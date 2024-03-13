@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports Distribution System</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: lightblue;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 0px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        color: black;
+        text-align: center; 
+    }
+    #datepicker {
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+    #status-search {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        background-color: #F2F2F2;
+    }
+    th {
+        background-color: lightblue;
+    }
+</style>
+</head>
+<body>
+ 
+<div class="container">
+<h2>Reports Distribution System</h2>
+<input type="text" id="datepicker" placeholder="Select a date">
+<input type="text" id="status-search" placeholder="Search by status">
+<table id="status-table">
+<thead>
+<tr>
+<th>TASK</th>
+<th>SUB PRODUCT</th>
+<th>AS OF DATE</th>
+<th>STATUS</th>
+<th>BATCH START</th>
+<th>TASK START</th>
+<th>TASK END</th>
+<th>EXPECTED</th>
+<th>ACTUAL</th>
+</tr>
+</thead>
+<tbody>
+<!-- Table body will be populated dynamically after selecting the date -->
+</tbody>
+</table>
+</div>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script>
+    $(function() {
+        $("#datepicker").datepicker({
+            dateFormat: 'm/d/yy',
+            onSelect: function(date) {
+                filterTable(date);
+            }
+        });
+ 
+        $("#status-search").on("input", function() {
+            filterTable($("#datepicker").val());
+        });
+ 
+        function filterTable(date) {
+            var searchText = $("#status-search").val().toLowerCase();
+            var filteredData = data.filter(function(row) {
+                return row["AS OF DATE"] === date && row["STATUS"].toLowerCase().includes(searchText);
+            });
+            populateTable(filteredData);
+        }
+ 
+        function populateTable(data) {
+            var tbody = $("#status-table tbody");
+            tbody.empty();
+ 
+            data.forEach(function(row) {
+                var tr = $("<tr>");
+                Object.values(row).forEach(function(cell) {
+                    tr.append("<td>" + cell + "</td>");
+                });
+                tbody.append(tr);
+            });
+        }
+ 
+        function updateStatus() {
+            setInterval(function() {
+                data.forEach(function(row) {
+                    if (row["STATUS"] === "DONE") {
+                        row["STATUS"] = "FAIL";
+                    } else {
+                        row["STATUS"] = "DONE";
+                    }
+                });
+                var currentDate = $("#datepicker").val();
+                filterTable(currentDate);
+                localStorage.setItem("data", JSON.stringify(data)); // Save updated data to localStorage
+            }, 60000); // 300000 milliseconds = 5 minutes
+        }
+        // Check if data exists in localStorage and use it, otherwise use the default data
+        var savedData = localStorage.getItem("data");
+        if (savedData) {
+            data = JSON.parse(savedData);
+        }
+ 
+        updateStatus();
+    });
+ 
+    // Sample data
+    var data = [
+        { TASK: "Check for completion of EOD Canada process", "SUB PRODUCT": "EOD CANADA", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "1/31/2024", STATUS: "FAIL", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "230", ACTUAL: "230" },
+        { TASK: "InitDayOnsStmts_CA", "SUB PRODUCT": "InitDayOneStmts_CA", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "InitDayOnsStmts_NYTC", "SUB PRODUCT": "InitDayOneStmts_NYTC", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "240", ACTUAL: "240" },
+
+        { TASK: "Check for completion of EOD  process", "SUB PRODUCT": "CANADA", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "Canada E-Statement", "SUB PRODUCT": "CAN01", "AS OF DATE": "1/31/2024", STATUS: "FAIL", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "230", ACTUAL: "230" },
+        { TASK: "InitDayOns", "SUB PRODUCT": "InitDay", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "InitDayOnsNYtc", "SUB PRODUCT": "InitDayOneStmts", "AS OF DATE": "1/31/2024", STATUS: "DONE", "BATCH START": "1/31/2024 6:45", "TASK START": "1/31/2024 6:45", "TASK END": "1/31/2024 8:15", EXPECTED: "240", ACTUAL: "240" },
+
+
+
+        { TASK: "Check for completion of EOD Canada process", "SUB PRODUCT": "EOD CANADA", "AS OF DATE": "2/29/2024", STATUS: "DONE", "BATCH START": "2/29/2024 6:45", "TASK START": "2/29/2024 6:45", "TASK END": "2/29/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "2/29/2024", STATUS: "DONE", "BATCH START": "2/29/2024 6:45", "TASK START": "2/29/2024 6:45", "TASK END": "2/29/2024 8:15", EXPECTED: "170", ACTUAL: "170" },
+        { TASK: "InitDayOnsStmts_CA", "SUB PRODUCT": "InitDayOneStmts_CA", "AS OF DATE": "2/29/2024", STATUS: "DONE", "BATCH START": "2/29/2024 6:45", "TASK START": "2/29/2024 6:45", "TASK END": "2/29/2024 8:15", EXPECTED: "230", ACTUAL: "230" },
+        { TASK: "InitDayOnsStmts_NYTC", "SUB PRODUCT": "InitDayOneStmts_NYTC", "AS OF DATE": "2/29/2024", STATUS: "DONE", "BATCH START": "2/29/2024 6:45", "TASK START": "2/29/2024 6:45", "TASK END": "2/29/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "Check for completion of EOD Canada process", "SUB PRODUCT": "EOD CANADA", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "240", ACTUAL: "240" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "3/31/2024", STATUS: "FAIL", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "InitDayOnsStmts_CA", "SUB PRODUCT": "InitDayOneStmts_CA", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "170", ACTUAL: "170" },
+        { TASK: "InitDayOnsStmts_TC", "SUB PRODUCT": "InitDayOneStmts_TC", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "Check for completion of EOD", "SUB PRODUCT": "EOD", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "240", ACTUAL: "240" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "3/31/2024", STATUS: "FAIL", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "InitDayOnsSs_CA", "SUB PRODUCT": "InitDayOneSs_CA", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "170", ACTUAL: "170" },
+        { TASK: "InitDayOnsStmtC", "SUB PRODUCT": "InitDayOneStmtsC", "AS OF DATE": "3/31/2024", STATUS: "DONE", "BATCH START": "3/31/2024 6:45", "TASK START": "3/31/2024 6:45", "TASK END": "3/31/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "Check for completion of EOD Canada process", "SUB PRODUCT": "EOD CANADA", "AS OF DATE": "4/30/2024", STATUS: "DONE", "BATCH START": "4/30/2024 6:45", "TASK START": "4/30/2024 6:45", "TASK END": "4/30/2024 8:15", EXPECTED: "170", ACTUAL: "170" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "4/30/2024", STATUS: "DONE", "BATCH START": "4/30/2024 6:45", "TASK START": "4/30/2024 6:45", "TASK END": "4/30/2024 8:15", EXPECTED: "230", ACTUAL: "230" },
+        { TASK: "InitDayOnsStmts_CA", "SUB PRODUCT": "InitDayOneStmts_CA", "AS OF DATE": "4/30/2024", STATUS: "FAIL", "BATCH START": "4/30/2024 6:45", "TASK START": "4/30/2024 6:45", "TASK END": "4/30/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+        { TASK: "InitDayOnsStmts_NYTC", "SUB PRODUCT": "InitDayOneStmts_NYTC", "AS OF DATE": "4/30/2024", STATUS: "FAIL", "BATCH START": "4/30/2024 6:45", "TASK START": "4/30/2024 6:45", "TASK END": "4/30/2024 8:15", EXPECTED: "240", ACTUAL: "240" },
+        { TASK: "Check for completion of EOD Canada process", "SUB PRODUCT": "EOD CANADA", "AS OF DATE": "5/31/2024", STATUS: "DONE", "BATCH START": "5/31/2024 6:45", "TASK START": "5/31/2024 6:45", "TASK END": "5/31/2024 8:15", EXPECTED: "180", ACTUAL: "180" },
+        { TASK: "Canada E-Statement of account", "SUB PRODUCT": "CAN01-STMT", "AS OF DATE": "5/31/2024", STATUS: "DONE", "BATCH START": "5/31/2024 6:45", "TASK START": "5/31/2024 6:45", "TASK END": "5/31/2024 8:15", EXPECTED: "170", ACTUAL: "170" },
+        { TASK: "InitDayOnsStmts_CA", "SUB PRODUCT": "InitDayOneStmts_CA", "AS OF DATE": "5/31/2024", STATUS: "DONE", "BATCH START": "5/31/2024 6:45", "TASK START": "5/31/2024 6:45", "TASK END": "5/31/2024 8:15", EXPECTED: "230", ACTUAL: "230" },
+        { TASK: "InitDayOnsStmts_NYTC", "SUB PRODUCT": "InitDayOneStmts_NYTC", "AS OF DATE": "5/31/2024", STATUS: "DONE", "BATCH START": "5/31/2024 6:45", "TASK START": "5/31/2024 6:45", "TASK END": "5/31/2024 8:15", EXPECTED: "120", ACTUAL: "120" },
+    ];
+</script>
+ 
+</body>
+</html>
